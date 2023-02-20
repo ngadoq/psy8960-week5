@@ -11,15 +11,16 @@ Bnotes_tbl <- read_tsv("../data/Bnotes.txt")
 # Data Cleaning
 
 Aclean_tbl <- Adata_tbl |> 
-  separate(qs, into = paste0("q",1:5), sep = " - ") |> 
-  mutate(datadate = as.POSIXct(datadate, format = "%b %d %Y, %H:%M:%S"),
-         across(q1:q5, as.integer)) |> 
-  inner_join(Anotes_tbl, by = "parnum") |> 
+  separate(qs, into = paste0("q",1:5)) |> 
+  mutate(datadate = mdy_hms(datadate)) |> 
+  mutate(across(contains("q"), as.integer)) |> 
+  inner_join(Anotes_tbl) |> # no dup, no NA 
+  # longitudinal with NA -> full_join
   filter(is.na(notes))
 ABclean_tbl <- Bdata_tbl |> 
-  mutate(datadate = as.POSIXct(datadate, format = "%b %d %Y, %H:%M:%S"),
-         across(q1:q10, as.integer)) |> 
-  inner_join(Bnotes_tbl, by = "parnum") |>
+  mutate(datadate = mdy_hms(datadate)) |> 
+  mutate(across(contains("q"), as.integer)) |> 
+  inner_join(Bnotes_tbl) |>
   filter(is.na(notes)) |> 
   bind_rows(Aclean_tbl, .id = "lab") |> 
   select(-notes)
