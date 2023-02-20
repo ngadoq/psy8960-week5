@@ -16,5 +16,11 @@ Aclean_tbl <- Adata_tbl |>
          across(q1:q5, as.integer)) |> 
   inner_join(Anotes_tbl, by = "parnum") |> 
   filter(is.na(notes))
-
-  
+ABclean_tbl <- Bdata_tbl |> 
+  mutate(datadate = as.POSIXct(datadate, format = "%b %d %Y, %H:%M:%S"),
+         across(q1:q10, as.integer)) |> 
+  inner_join(Bnotes_tbl, by = "parnum") |>
+  filter(is.na(notes)) |> 
+  bind_rows(Aclean_tbl, .id = "lab") |> 
+  select(-notes)
+ 
